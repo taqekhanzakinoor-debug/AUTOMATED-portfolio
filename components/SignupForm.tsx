@@ -49,12 +49,14 @@ export default function SignupForm() {
   };
 
   const inputClass =
-    'w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition';
+    'w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all duration-200';
 
   return (
-    <div className="min-h-screen bg-neutral-950 py-16 px-4">
-      <form onSubmit={handleSubmit} className="max-w-xl mx-auto">
-        <div className="text-center mb-10">
+    <div className="min-h-screen bg-neutral-950 py-16 px-4 relative overflow-hidden">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+
+      <form onSubmit={handleSubmit} className="max-w-xl mx-auto relative z-10">
+        <div className="text-center mb-10 animate-fade-in">
           <h1 className="text-3xl font-bold text-white tracking-tight">
             Create Your Portfolio
           </h1>
@@ -63,7 +65,7 @@ export default function SignupForm() {
           </p>
         </div>
 
-        <div className="space-y-5 bg-neutral-900/40 border border-neutral-800 rounded-2xl p-6">
+        <div className="space-y-5 bg-neutral-900/40 border border-neutral-800 rounded-2xl p-6 animate-fade-in-delay-1 backdrop-blur-sm">
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1.5">
               Portfolio Username
@@ -114,13 +116,13 @@ export default function SignupForm() {
               {form.projects.map((p, i) => (
                 <div
                   key={i}
-                  className="border border-neutral-800 rounded-xl p-4 bg-neutral-950/50 space-y-3 relative"
+                  className="border border-neutral-800 rounded-xl p-4 bg-neutral-950/50 space-y-3 relative hover:border-neutral-700 transition-colors duration-200"
                 >
                   {form.projects.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeProject(i)}
-                      className="absolute top-3 right-3 text-neutral-500 hover:text-red-400 text-sm"
+                      className="absolute top-3 right-3 text-neutral-500 hover:text-red-400 text-sm transition-colors"
                     >
                       ✕
                     </button>
@@ -144,7 +146,7 @@ export default function SignupForm() {
             <button
               type="button"
               onClick={addProject}
-              className="mt-3 text-sm text-indigo-400 hover:text-indigo-300 font-medium"
+              className="mt-3 text-sm text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
             >
               + Add another project
             </button>
@@ -153,7 +155,7 @@ export default function SignupForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3.5 rounded-xl transition flex items-center justify-center gap-2"
+            className="w-full bg-indigo-600 hover:bg-indigo-500 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
           >
             {loading ? (
               <>

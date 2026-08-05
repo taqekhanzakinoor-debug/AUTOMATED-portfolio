@@ -26,57 +26,69 @@ export default async function PortfolioPage({ params }: Props) {
   if (!profile) notFound();
   const { data: projects } = await supabase.from('projects').select('*').eq('profile_id', profile.id);
 
+  const hasStats = (profile.public_repos || 0) > 0 || (profile.total_stars || 0) > 0 || (profile.followers || 0) > 0;
+
   return (
     <main className="min-h-screen bg-neutral-950">
-      <div className="border-b border-neutral-800 bg-gradient-to-b from-neutral-900 to-neutral-950">
-        <div className="max-w-3xl mx-auto px-6 py-16">
-          <div className="flex items-center gap-5">
+      <div className="border-b border-neutral-800 bg-gradient-to-b from-neutral-900 to-neutral-950 relative overflow-hidden">
+        <div className="absolute -top-32 left-1/4 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="max-w-3xl mx-auto px-6 py-16 relative z-10">
+          <div className="flex items-center gap-5 animate-fade-in">
             <img src={profile.avatar_url} className="w-24 h-24 rounded-full border-2 border-neutral-800" alt={profile.full_name} />
             <div>
               <h1 className="text-3xl font-bold text-white">{profile.full_name}</h1>
-              <a href={profile.github_url} target="_blank" className="text-sm text-indigo-400 hover:text-indigo-300 mt-1 inline-block">
+              <a href={profile.github_url} target="_blank" className="text-sm text-indigo-400 hover:text-indigo-300 mt-1 inline-block transition-colors">
                 {profile.github_url}
               </a>
             </div>
           </div>
-          <p className="mt-6 text-neutral-300 text-lg leading-relaxed max-w-2xl">
+
+          <p className="mt-6 text-neutral-300 text-lg leading-relaxed max-w-2xl animate-fade-in-delay-1">
             {profile.bio}
           </p>
-          <div className="flex flex-wrap gap-2 mt-6">
+
+          <div className="flex flex-wrap gap-2 mt-6 animate-fade-in-delay-2">
             {profile.skill_tags && profile.skill_tags.map((tag: string) => (
-              <span key={tag} className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-3 py-1 rounded-full text-sm font-medium">
+              <span key={tag} className="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-3 py-1 rounded-full text-sm font-medium hover:bg-indigo-500/20 transition-colors">
                 {tag}
               </span>
             ))}
           </div>
-          <div className="flex gap-8 mt-8 pt-6 border-t border-neutral-800">
-          <div>
-            <div className="text-2xl font-bold text-white">{profile.public_repos || 0}</div>
-            <div className="text-xs text-neutral-500 mt-0.5">Public Repos</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-white">{profile.total_stars || 0}</div>
-            <div className="text-xs text-neutral-500 mt-0.5">Total Stars</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-white">{profile.followers || 0}</div>
-            <div className="text-xs text-neutral-500 mt-0.5">Followers</div>
-          </div>
-          {profile.top_languages && profile.top_languages.length > 0 && (
-            <div>
-              <div className="text-2xl font-bold text-white">{profile.top_languages[0]}</div>
-              <div className="text-xs text-neutral-500 mt-0.5">Top Language</div>
+
+          {hasStats && (
+            <div className="flex gap-8 mt-8 pt-6 border-t border-neutral-800 animate-fade-in-delay-3">
+              <div>
+                <div className="text-2xl font-bold text-white">{profile.public_repos || 0}</div>
+                <div className="text-xs text-neutral-500 mt-0.5">Public Repos</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">{profile.total_stars || 0}</div>
+                <div className="text-xs text-neutral-500 mt-0.5">Total Stars</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">{profile.followers || 0}</div>
+                <div className="text-xs text-neutral-500 mt-0.5">Followers</div>
+              </div>
+              {profile.top_languages && profile.top_languages.length > 0 && (
+                <div>
+                  <div className="text-2xl font-bold text-white">{profile.top_languages[0]}</div>
+                  <div className="text-xs text-neutral-500 mt-0.5">Top Language</div>
+                </div>
+              )}
             </div>
           )}
-        </div>
         </div>
       </div>
 
       <div className="max-w-3xl mx-auto px-6 py-12">
         <h2 className="text-xl font-semibold text-white mb-6">Projects</h2>
         <div className="grid gap-4">
-          {projects && projects.map((p) => (
-            <div key={p.id} className="border border-neutral-800 rounded-2xl p-6 bg-neutral-900/40 hover:border-neutral-700 transition">
+          {projects && projects.map((p, i) => (
+            <div
+              key={p.id}
+              className="border border-neutral-800 rounded-2xl p-6 bg-neutral-900/40 hover:border-neutral-700 hover:-translate-y-0.5 transition-all duration-200"
+            >
               <div className="flex items-start justify-between gap-4">
                 <h3 className="font-semibold text-white text-lg">{p.title}</h3>
                 {p.created_at && (
@@ -98,7 +110,7 @@ export default async function PortfolioPage({ params }: Props) {
                 </div>
               )}
               {p.repo_url && (
-                <a href={p.repo_url} target="_blank" className="text-indigo-400 hover:text-indigo-300 text-sm mt-4 inline-block font-medium">
+                <a href={p.repo_url} target="_blank" className="text-indigo-400 hover:text-indigo-300 text-sm mt-4 inline-block font-medium transition-colors">
                   View repository
                 </a>
               )}
