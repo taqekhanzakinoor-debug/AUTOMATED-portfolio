@@ -35,3 +35,19 @@ body {
   animation: fadeInUp 0.5s ease-out 0.3s forwards;
   opacity: 0;
 }
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  main {
+    background: white !important;
+  }
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}

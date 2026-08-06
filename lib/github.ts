@@ -12,7 +12,6 @@ export async function fetchGithubActivity(githubUsername: string) {
 
   const repoList = Array.isArray(repos) ? repos : [];
 
-  // Count languages across all repos
   const languageCounts: Record<string, number> = {};
   repoList.forEach((r: any) => {
     if (r.language) {
@@ -26,6 +25,17 @@ export async function fetchGithubActivity(githubUsername: string) {
 
   const totalStars = repoList.reduce((sum: number, r: any) => sum + (r.stargazers_count || 0), 0);
 
+  const featuredRepos = [...repoList]
+    .sort((a: any, b: any) => (b.stargazers_count || 0) - (a.stargazers_count || 0))
+    .slice(0, 4)
+    .map((r: any) => ({
+      name: r.name,
+      description: r.description,
+      url: r.html_url,
+      language: r.language,
+      stars: r.stargazers_count || 0,
+    }));
+
   return {
     avatarUrl: user.avatar_url,
     fullName: user.name || githubUsername,
@@ -33,6 +43,8 @@ export async function fetchGithubActivity(githubUsername: string) {
     followers: user.followers || 0,
     totalStars,
     topLanguages,
+    joinedAt: user.created_at ? user.created_at.split('T')[0] : null,
+    featuredRepos,
     repos: repoList.slice(0, 10).map((r: any) => ({
       name: r.name,
       description: r.description,

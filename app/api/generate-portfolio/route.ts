@@ -5,7 +5,7 @@ import { generatePortfolioContent } from '@/lib/gemini';
 
 export async function POST(req: NextRequest) {
   try {
-    const { username, githubUrl, skills, projects } = await req.json();
+    const { username, githubUrl, skills, projects, email, websiteUrl, linkedinUrl, twitterUrl, customAvatarUrl } = await req.json();
 
     if (!username || !githubUrl) {
       return NextResponse.json({ error: 'Username and GitHub username are required' }, { status: 400 });
@@ -32,11 +32,17 @@ export async function POST(req: NextRequest) {
         full_name: githubData.fullName,
         bio: aiContent.bio,
         skill_tags: aiContent.skillTags,
-        avatar_url: githubData.avatarUrl,
+        avatar_url: customAvatarUrl || githubData.avatarUrl,
         public_repos: githubData.publicRepos,
         followers: githubData.followers,
         total_stars: githubData.totalStars,
         top_languages: githubData.topLanguages,
+        github_joined_at: githubData.joinedAt,
+        featured_repos: githubData.featuredRepos,
+        email: email || null,
+        website_url: websiteUrl || null,
+        linkedin_url: linkedinUrl || null,
+        twitter_url: twitterUrl || null,
       })
       .select()
       .single();

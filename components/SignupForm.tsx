@@ -1,14 +1,22 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabaseClient } from '@/lib/supabaseClient';
 
 export default function SignupForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [photoMode, setPhotoMode] = useState<'github' | 'upload' | 'url'>('github');
+  const [customAvatarUrl, setCustomAvatarUrl] = useState('');
   const [form, setForm] = useState({
     username: '',
     githubUrl: '',
     skills: '',
+    email: '',
+    websiteUrl: '',
+    linkedinUrl: '',
+    twitterUrl: '',
     projects: [{ title: '', description: '' }],
   });
 
@@ -26,6 +34,27 @@ export default function SignupForm() {
     setForm({ ...form, projects: form.projects.filter((_, idx) => idx !== i) });
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+
+      const { error } = await supabaseClient.storage.from('avatars').upload(fileName, file);
+      if (error) throw error;
+
+      const { data } = supabaseClient.storage.from('avatars').getPublicUrl(fileName);
+      setCustomAvatarUrl(data.publicUrl);
+    } catch (err) {
+      alert('Photo upload failed, please try again');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -33,7 +62,10 @@ export default function SignupForm() {
       const res = await fetch('/api/generate-portfolio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          customAvatarUrl: photoMode !== 'github' ? customAvatarUrl : '',
+        }),
       });
       const result = await res.json();
       setLoading(false);
@@ -96,6 +128,104 @@ export default function SignupForm() {
           </div>
 
           <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Profile Picture
+            </label>
+            <div className="flex gap-2 mb-3">
+              <button
+                type="button"
+                onClick={() => setPhotoMode('github')}
+                className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${photoMode === 'github' ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300' : 'border-neutral-800 text-neutral-500 hover:text-neutral-300'}`}
+              >
+                Use GitHub photo
+              </button>
+              <button
+                type="button"
+                onClick={() => setPhotoMode('upload')}
+                className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${photoMode === 'upload' ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300' : 'border-neutral-800 text-neutral-500 hover:text-neutral-300'}`}
+              >
+                Upload a photo
+              </button>
+              <button
+                type="button"
+                onClick={() => setPhotoMode('url')}
+                className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${photoMode === 'url' ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300' : 'border-neutral-800 text-neutral-500 hover:text-neutral-300'}`}
+              >
+                Paste a photo URL
+              </button>
+            </div>
+
+            {photoMode === 'upload' && (
+              <div>
+                <input type="file" accept="image/*" onChange={handleFileUpload} className="text-sm text-neutral-400" />
+                {uploading && <p className="text-xs text-indigo-400 mt-2">Uploading...</p>}
+                {customAvatarUrl && !uploading && (
+                  <img src={customAvatarUrl} className="w-16 h-16 rounded-full mt-3 border border-neutral-800" alt="Preview" />
+                )}
+              </div>
+            )}
+
+            {photoMode === 'url' && (
+              <input
+                placeholder="https://example.com/your-photo.jpg"
+                className={inputClass}
+                value={customAvatarUrl}
+                onChange={(e) => setCustomAvatarUrl(e.target.value)}
+              />
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                Email <span className="text-neutral-500 font-normal">(optional)</span>
+              </label>
+              <input
+                placeholder="you@example.com"
+                className={inputClass}
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                Website <span className="text-neutral-500 font-normal">(optional)</span>
+              </label>
+              <input
+                placeholder="yoursite.com"
+                className={inputClass}
+                value={form.websiteUrl}
+                onChange={(e) => setForm({ ...form, websiteUrl: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                LinkedIn <span className="text-neutral-500 font-normal">(optional)</span>
+              </label>
+              <input
+                placeholder="linkedin.com/in/you"
+                className={inputClass}
+                value={form.linkedinUrl}
+                onChange={(e) => setForm({ ...form, linkedinUrl: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-300 mb-1.5">
+                Twitter / X <span className="text-neutral-500 font-normal">(optional)</span>
+              </label>
+              <input
+                placeholder="x.com/you"
+                className={inputClass}
+                value={form.twitterUrl}
+                onChange={(e) => setForm({ ...form, twitterUrl: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1.5">
               Skills
             </label>
@@ -154,7 +284,7 @@ export default function SignupForm() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || uploading}
             className="w-full bg-indigo-600 hover:bg-indigo-500 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
           >
             {loading ? (
