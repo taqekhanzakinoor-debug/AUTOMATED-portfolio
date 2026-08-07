@@ -64,17 +64,32 @@ Building this project involved real, practical problems at nearly every stage. B
 
 ## Overall Learnings
 
-- Windows applies strict default security policies to script execution — understanding execution policies is essential for development environment setup.
-- Development tools often depend on other tools being installed system-wid and a fresh restart is frequently required after installing new software.
-- In Next.js, the `@/` import alias resolves relative to the project root — file placement directly affects whether imports resolve at all. Readig error messages carefully (they include exact file paths and line numbers) is the fastest way to diagnose structural issues.
-- Clipboard or editor auto-formatting can silently corrupt pasted code — when many unrelated errors appear at once, starting the file fresh is often faster than debugging line-by-line.
-- AI provider APIs evolve quickly, and hardcoding a specific model version creates a fragile dependency — using a "latest" alias where available is a more maintainable pattern.
-- Manual copy-pasting of configuration values across different tools is a common source of human error — bulk-import options are safer than transcribing values by hand.
-- Long development sessions with multiple terminal windows can leave orphaned background processes running — knowing how to find and close a process by port is a useful troubleshooting skill.
-- Security practices like `.gitignore` rules must be actively verified, not assumed — checking the actual published repository is the only way to be certain sensitive files were not accidentally included.
-- Deployment platforms like Vercel connect directly to a GitHub repository and automatically rebuild the live site on every push — this "push to deploy" workflow removes manual upload steps entirely, but also means environment variables must be configured separately in the platform's own settings, since they're never included in the pushed code.
-- Supabase provides both a database (PostgreSQL) and file storage (for the profile photo uploads) under one project, but each needs its own permissions configured separately — a table needs no special setup for server-side access with a secret key, while a storage bucket needs explicit read/write policies before public uploads or downloads will work at all.
+### Technologies learned
 
+- **Next.js** — learned how a single framework can handle both the pages users see (frontend) and the backend logic (API routes) in one project, and how folder names control page addresses (like `[username]` creating a dynamic page for every user).
+- **TypeScript** — learned why adding types to JavaScript catches mistakes early, before the code even runs.
+- **React** — learned the basics of components, state (`useState`), and how a form updates and reacts as the user types.
+- **Tailwind CSS** — learned how to style a whole website quickly using small utility classes instead of writing separate CSS files.
+- **Supabase** — learned how to set up a real database (tables, columns) and file storage without needing to build or host a database server myself.
+- **REST APIs** — learned how to call an external service (like GitHub) from code and use the data it sends back.
+- **Google Gemini API** — learned how to send a written instruction ("prompt") to an AI model and get back structured, usable text.
+- **Git and GitHub** — learned how to save version history, push code to the cloud, and collaborate with a teammate on the same project.
+- **Vercel** — learned how to deploy a website live on the internet, and how it automatically rebuilds the site every time new code is pushed.
+- **GitHub Actions (CI/CD)** — learned how to set up an automated pipeline that checks the code builds correctly every time it changes.
+- **Environment variables** — learned why secret keys (like API keys) should never be written directly in code, and how to store them safely instead.
+
+### Practical lessons learned
+
+- Windows sometimes blocks scripts from running by default, so you may need to change a security setting before tools like `npx` will work.
+- After installing new software (like Git), you often need to fully restart your code editor before it recognizes the new tool.
+- In Next.js, where you place a file actually matters — put it in the wrong folder and the app can't find it, even if the code inside is correct.
+- Sometimes pasting code causes weird, hard-to-explain errors. When that happens, it's often faster to delete the file and paste fresh than to try fixing it piece by piece.
+- AI tools like Gemini update their models often, and older model names can stop working. Using a "latest" version instead of a fixed one helps avoid this problem in the future.
+- It's easy to accidentally mix up which box you're supposed to type a name in versus a value — always double check before saving settings like environment variables.
+- Running multiple terminals at once can leave old processes stuck in the background, blocking new ones from starting. You have to manually close them.
+- Never assume your private keys are safe just because you meant to hide them — always check the actual GitHub repository to confirm secret files were not uploaded by mistake.
+- Vercel automatically rebuilds and updates your live website every time you push new code to GitHub — but it does not automatically know your secret keys, so those have to be added separately in Vercel's own settings.
+- Supabase gives you both a database and file storage, but they work differently — the database is ready to use right away with the right key, while file storage (like photo uploads) needs its own permission rules turned on before it will actually work.
 ## Complete Feature List
 
 - AI-generated bio and skill tags (via Google Gemini)
