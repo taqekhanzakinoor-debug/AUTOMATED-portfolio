@@ -17,25 +17,45 @@ Projects entered by user: ${JSON.stringify(userProjects)}
 Recent GitHub repos: ${JSON.stringify(githubData.repos)}
 `;
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-      }),
+  const maxRetries = 3;
+  let lastError: any = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!data.candidates || !data.candidates[0]) {
+        const isOverloaded = data.error?.code === 503;
+        lastError = new Error('Gemini API did not return candidates. Full response: ' + JSON.stringify(data));
+
+        if (isOverloaded && attempt < maxRetries) {
+          const waitMs = attempt * 2000;
+          console.log(`Gemini overloaded, retrying in ${waitMs}ms (attempt ${attempt}/${maxRetries})`);
+          await new Promise((resolve) => setTimeout(resolve, waitMs));
+          continue;
+        }
+        throw lastError;
+      }
+
+      const rawText = data.candidates[0].content.parts[0].text;
+      const cleaned = rawText.replace(/```json|```/g, '').trim();
+      return JSON.parse(cleaned);
+    } catch (err) {
+      lastError = err;
+      if (attempt === maxRetries) throw err;
     }
-  );
+  }
 
-  const data = await res.json();
-   console.log('GEMINI RAW RESPONSE:', JSON.stringify(data, null, 2));
-
-   if (!data.candidates || !data.candidates[0]) {
-     throw new Error('Gemini API did not return candidates. Full response: ' + JSON.stringify(data));
-   }
-
-   const rawText = data.candidates[0].content.parts[0].text;
-  const cleaned = rawText.replace(/```json|```/g, '').trim();
-  return JSON.parse(cleaned);
+  throw lastError;
 }
