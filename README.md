@@ -1,4 +1,4 @@
-# CodeHub Portfolio Platform
+# AUTOMATED Portfolio Platform
 
 An AI-powered developer portfolio generator. Users enter their GitHub username, skills, and
 a few rough project notes — the platform automatically fetches real GitHub activity, uses
